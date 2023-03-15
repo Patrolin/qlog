@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script>
+            const QLOG_URL = "http://localhost:8080";
+            var sessionId, qlogEnable;
+
+            const APP_VERSION = 0;
+
+            async function qlogSetup() {
+                sessionId = +new Date();
+                await fetch(`${QLOG_URL}/${sessionId}`, { method: "POST", body: APP_VERSION });
+                qlogEnable = true;
+            }
+            function qlog(row) {
+                if (qlogEnable) fetch(`${QLOG_URL}/${sessionId}`, { method: "POST", body: row });
+            }
+            qlogSetup();
+        </script>
+    </head>
+    <body>
+        <button onclick="qlog('abc')">Log something</button>
+    </body>
+</html>
