@@ -17,17 +17,23 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.send_header("Content-type", "text/json")
             self.end_headers()
             self.wfile.write(str(getNextId()).encode())
+        elif self.path == "/favicon.ico":
+            self.send_response(200)
+            self.send_header("Content-type", "image/ico")
+            self.end_headers()
+            with open(self.path.removeprefix("/"), "rb") as f:
+                self.wfile.write(f.read())
         else:
             self.send_response(404)
 
     def do_POST(self):
         try:
-            print(self.path)
             length = int(self.headers.get("content-length") or "0")
             rfile = cast(BufferedReader, self.rfile)
             read_bytes = rfile.read(length)
             read = read_bytes.decode("utf8")
             sessionId = int(self.path[1:])
+            mkdir("log")
             with open(f"log/{sessionId}", "a+") as f:
                 f.write(read + "\n")
             self.send_response(200)
@@ -39,7 +45,6 @@ class MyRequestHandler(BaseHTTPRequestHandler):
 
 PORT = 8080
 if __name__ == "__main__":
-    mkdir("log")
     with ThreadingHTTPServer(("", PORT), MyRequestHandler) as httpd:
         #httpd.socket = ssl.wrap_socket(httpd.socket, certfile='localhost.pem', server_side=True)
         httpd.serve_forever()
